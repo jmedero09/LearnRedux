@@ -21,63 +21,66 @@ var stateDefault = {
 var nextHobbyId = 1;
 var nextMovieId = 1;
 
-var reducer = (state = stateDefault,action)=>{
-	//state = state || {name:'Anonymous'}
+//since we pulled out this reducer from the object we are no longer dealing with 
+//object syntax in our state for this reducer all that maintance happend in combineReducer
+var nameReducer = (state ='Anonymous' ,action)=>{
 	switch(action.type){
-		case'CHANGE_NAME':
-			return{
-				...state,
-				name:action.name
-			};
-		case 'ADD_HOBBY':
-			return{
-				...state,
-				hobbies:[
-				...state.hobbies,
-					{	
-						id:nextHobbyId++,
-						hobby:action.hobby
-					}
-				]
-			};
-		case 'REMOVE_HOBBY':
-			return{
-				//return all the properties from are existing state 
-				//then we follow up with what we want to change in our 
-				//hobbies array
-				...state,
-
-				//return true keeps items false removes item
-				//keeping every hooby that does not match the
-				//action id
-				hobbies:state.hobbies.filter((hobby)=>hobby.id !== action.id)
-			};
-					
-		case 'ADD_MOVIE':
-			return{
-				...state,
-				movies:[
-					...state.movies,
-					{
-						id:nextMovieId++,
-						title:action.title,
-						genre:action.genre
-
-					}
-				]
-			};
-		case 'REMOVE_MOVIE':
-			return{
-				...state,
-
-				movies:state.movies.filter((movie)=>movie.id !== action.id)
-			};
-
-		default:{
+		case 'CHANGE_NAME':
+			return action.name
+		default:
 			return state;
-		}
+	};
+
+};
+var hobbieReducer = (state=[],action)=>{
+	switch(action.type){
+		case 'ADD_HOBBY':
+			return [
+				...state,
+				{	
+					id:nextHobbyId++,
+					hobby:action.hobby
+				}
+			];
+		case 'REMOVE_HOBBY':
+			return state.filter((hobby)=>hobby.id !== action.id)
+		default:
+			return state;
+	};
+};
+var movieReducer =(state =[],action)=>{
+	switch(action.type){
+		case 'ADD_MOVIE':
+			return[
+				...state,
+
+				{
+					id:nextMovieId++,
+					title:action.title,
+					genre:action.genre				
+				}
+			];
+
+		case 'REMOVE_MOVIE':
+			return state.filter((movie)=>movie.id !== action.id)
+
+		default:
+			return state;
 	}
 }
+
+//combine reducer takes as its argument an object
+//the key value pairs in this object will be the names
+//of the items that you want to manage
+var reducer = redux.combineReducers({
+	//here we are saying the name state is going to be managed by the nameReducer
+	//value is name and the reducer is nameReducer
+	name:nameReducer,
+	hobbies:hobbieReducer,
+	movies:movieReducer
+
+})
+
 var store = redux.createStore(reducer,redux.compose(
 	window.devToolsExtension ? window.devToolsExtension():f => f
 ));
