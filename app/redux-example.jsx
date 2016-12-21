@@ -10,6 +10,7 @@
 //2 retunrs state even if their is no action on if its an action it does not recognize 
 
 var redux = require('redux');
+var axios = require('axios');
 console.log('Starting redux example');
 //since we pulled out this reducer from the object we are no longer dealing with 
 //object syntax in our state for this reducer all that maintance happend in combineReducer
@@ -88,7 +89,7 @@ var movieReducer =(state =[],action)=>{
 			return state;
 	}
 }
-var addMovie = (movie,genre)=>{
+var addMovie = (title,genre)=>{
 	return {
 
 		type:'ADD_MOVIE',
@@ -103,6 +104,45 @@ var removeMovie = (id)=>{
 		id:id
 	}
 }
+//Map Reducer and Action Generator
+//-----------------------------------
+var mapReducer = (state={isFetching:false,url:undefined},action)=>{
+	switch(action.type){
+		case 'START_LOCATION_FECTH':
+		return{
+			isFetching:true,
+			url:undefined
+		}
+		case 'COMPLETE_LOCATION_FETCH':
+		return{
+			isFetching:false,
+			url:action.url
+		}
+		default:
+		return state
+	}
+}
+var startLocationFetch=()=>{
+	return{
+		type:'START_LOCATION_FECTH'
+	}
+}
+var completeLocationFetch=(url)=>{
+	return{
+		type:'COMPLETE_LOCATION_FETCH',
+		url:url
+	}
+}
+var fetchLocation=()=>{
+	store.dispatch(startLocationFetch());
+
+	axios.get('http://ipinfo.io').then(function(res){
+		var loc = res.data.loc;
+		var baseUrl = 'http://maps.google.com?q='
+
+		store.dispatch(completeLocationFetch(baseUrl+loc));
+	});
+}
 //combine reducer takes as its argument an object
 //the key value pairs in this object will be the names
 //of the items that you want to manage
@@ -111,7 +151,8 @@ var reducer = redux.combineReducers({
 	//value is name and the reducer is nameReducer
 	name:nameReducer,
 	hobbies:hobbieReducer,
-	movies:movieReducer
+	movies:movieReducer,
+	map:mapReducer
 
 })
 
@@ -124,16 +165,24 @@ var store = redux.createStore(reducer,redux.compose(
 var unsubscribe = store.subscribe(()=>{
 	var state = store.getState();
 
-	console.log('name is ',state.name);
-	document.getElementById('app').innerHTML = state.name
 
 	console.log('New State ', store.getState());
+
+	if(state.map.isFetching){
+		document.getElementById('app').innerHTML = 'loading....';
+	}
+	else if(state.map.url){
+		document.getElementById('app').innerHTML = '<a href="'+state.map.url+'" target="_blank">View Your Location</a>';
+
+	}
 });
 //unsubscribe();
 
 //return our state object which shoudl be anonymous
 var currentState = store.getState();
+console.log('currentState',currentState);
 
+fetchLocation();
 //Dispatch Actions.............................................
 store.dispatch(changeName('Jesus Medero'));
 store.dispatch(changeName('Olivia Gresham'));
