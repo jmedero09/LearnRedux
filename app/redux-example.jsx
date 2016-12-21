@@ -10,19 +10,12 @@
 //2 retunrs state even if their is no action on if its an action it does not recognize 
 
 var redux = require('redux');
-
 console.log('Starting redux example');
-
-var stateDefault = {
-	name:'Anonymous',
-	hobbies:[],
-	movies:[]
-};
-var nextHobbyId = 1;
-var nextMovieId = 1;
-
 //since we pulled out this reducer from the object we are no longer dealing with 
 //object syntax in our state for this reducer all that maintance happend in combineReducer
+
+//Name Reducer and Action generator
+//------------------------------------
 var nameReducer = (state ='Anonymous' ,action)=>{
 	switch(action.type){
 		case 'CHANGE_NAME':
@@ -30,8 +23,18 @@ var nameReducer = (state ='Anonymous' ,action)=>{
 		default:
 			return state;
 	};
-
 };
+
+var changeName = (name)=>{
+	return{
+		type:'CHANGE_NAME',
+		name:name
+	}
+};
+
+//Hobbies Reducer and Action Generator
+//-------------------------------------
+var nextHobbyId = 1;
 var hobbieReducer = (state=[],action)=>{
 	switch(action.type){
 		case 'ADD_HOBBY':
@@ -48,6 +51,23 @@ var hobbieReducer = (state=[],action)=>{
 			return state;
 	};
 };
+var addHobby = (hobby)=>{
+	return {
+		type:'ADD_HOBBY',
+		hobby:hobby
+	}
+}
+
+var removeHobby = (id)=>{
+	return{
+		type:'REMOVE_HOBBY',
+		id:id
+	}
+}
+
+//Movie Reducer and Action Generator
+//------------------------------------- 
+var nextMovieId = 1;
 var movieReducer =(state =[],action)=>{
 	switch(action.type){
 		case 'ADD_MOVIE':
@@ -68,7 +88,21 @@ var movieReducer =(state =[],action)=>{
 			return state;
 	}
 }
+var addMovie = (movie,genre)=>{
+	return {
 
+		type:'ADD_MOVIE',
+		title:title,
+		genre:genre
+	}
+}
+
+var removeMovie = (id)=>{
+	return{
+		type:'REMOVE_MOVIE',
+		id:id
+	}
+}
 //combine reducer takes as its argument an object
 //the key value pairs in this object will be the names
 //of the items that you want to manage
@@ -86,6 +120,7 @@ var store = redux.createStore(reducer,redux.compose(
 ));
 
 //SUBSCRIBE TO CHANGE
+//will run everytime there is a change 
 var unsubscribe = store.subscribe(()=>{
 	var state = store.getState();
 
@@ -98,41 +133,20 @@ var unsubscribe = store.subscribe(()=>{
 
 //return our state object which shoudl be anonymous
 var currentState = store.getState();
-store.dispatch({
-	type:'CHANGE_NAME',
-	name:'Olivia'
-});
-store.dispatch({
-	type:'ADD_HOBBY',
-	hobby:'running'
-});
-store.dispatch({
-	type:'ADD_HOBBY',
-	hobby:'rock climbing'
-});
-store.dispatch({
-	type:'ADD_HOBBY',
-	hobby:'Barista'
-});
 
-store.dispatch({
-	type:'REMOVE_HOBBY',
-	id:2
-});
-store.dispatch({
-	type:'ADD_MOVIE',
-	title:'Rocky 1',
-	genre:'Fighting'
-});
-store.dispatch({
-	type:'ADD_MOVIE',
-	title:'Gods Not Dead',
-	genre:'Christian'
-});
+//Dispatch Actions.............................................
+store.dispatch(changeName('Jesus Medero'));
+store.dispatch(changeName('Olivia Gresham'));
 
-store.dispatch({
-	type:'REMOVE_MOVIE',
-	id:1
-});
+store.dispatch(addHobby('Running'));
+store.dispatch(addHobby('rock climbing'));
+store.dispatch(addHobby('Barista'));
+
+store.dispatch(removeHobby(2));
+
+store.dispatch(addMovie('Rocky','Action'));
+store.dispatch(addMovie('Gods not Dead 2','Christian'));
+
+store.dispatch(removeMovie(1));
 
 
